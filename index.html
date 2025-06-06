@@ -13,6 +13,7 @@
             --valorant-dark: #0F1923;
             --valorant-light: #ECE8E1;
             --valorant-grey: #7E878F;
+            --valorant-green: #3D9970;
         }
 
         * {
@@ -76,6 +77,28 @@
             color: var(--valorant-dark);
         }
 
+        button.remove-btn {
+            background-color: transparent;
+            color: var(--valorant-red);
+            border-color: var(--valorant-red);
+        }
+
+        button.remove-btn:hover {
+            background-color: var(--valorant-red);
+            color: var(--valorant-dark);
+        }
+        
+        button.buy-btn {
+            background-color: var(--valorant-green);
+            border-color: var(--valorant-green);
+            color: var(--valorant-dark);
+        }
+        
+        button.buy-btn:hover {
+            background-color: transparent;
+            color: var(--valorant-green);
+        }
+
         /* --- Form & Input Styles --- */
         .form-group {
             margin-bottom: 20px;
@@ -114,7 +137,7 @@
         
         #image-preview {
             width: 100%;
-            height: 500px;
+            height: 300px; 
             margin-top: 15px;
             border: 2px solid var(--valorant-grey);
             border-radius: 4px;
@@ -153,11 +176,32 @@
             gap: 20px;
             align-items: center;
             border-radius: 8px;
+            position: relative;
+            overflow: hidden; /* For sold banner */
+        }
+        
+        .account-card.sold-card {
+            opacity: 0.6;
+        }
+        
+        .sold-banner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-20deg);
+            background-color: var(--valorant-red);
+            color: var(--valorant-dark);
+            font-size: 4rem;
+            font-weight: bold;
+            padding: 10px 50px;
+            border: 4px solid var(--valorant-light);
+            z-index: 10;
+            pointer-events: none;
         }
         
         .account-card-image img {
             width: 100%;
-            height: 500px;
+            height: 300px;
             object-fit: cover;
             border: 2px solid var(--valorant-red);
             border-radius: 4px;
@@ -171,6 +215,12 @@
             gap: 15px;
         }
 
+        .account-card-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
         .account-card-info {
             padding-top: 10px;
         }
@@ -178,7 +228,7 @@
         .account-card-info h3 {
             color: var(--valorant-red);
             font-size: 2rem;
-            margin-bottom: 0;
+            margin-bottom: 10px;
         }
         
         .account-card-info p {
@@ -199,12 +249,18 @@
             border-bottom: 1px dashed var(--valorant-grey);
         }
         
-        .total-value {
-            font-size: 1.5rem;
+        .account-price {
+            font-size: 1.8rem;
             font-weight: bold;
-            text-align: right;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             color: var(--valorant-red);
-            margin-top: 10px;
+            margin-top: 15px;
+            border-top: 2px solid var(--valorant-grey);
+            padding-top: 10px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         #no-accounts-message {
@@ -258,7 +314,7 @@
             justify-content: space-between;
         }
         
-        /* --- PIN Modal --- */
+        /* --- Modal Styles --- */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -279,7 +335,7 @@
             border-radius: 8px;
             text-align: center;
             width: 90%;
-            max-width: 400px;
+            max-width: 450px;
         }
         
         .modal-content h2 {
@@ -288,7 +344,7 @@
              margin-bottom: 20px;
         }
         
-        .modal-content input {
+        #pin-input {
             text-align: center;
             font-size: 2rem;
             letter-spacing: 1rem;
@@ -307,6 +363,24 @@
             gap: 20px;
         }
 
+        .contact-links {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            font-size: 1.5rem;
+            align-items: flex-start;
+            text-align: left;
+        }
+        .contact-links a {
+            color: var(--valorant-red);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .contact-links a:hover {
+            color: var(--valorant-light);
+        }
+
     </style>
 </head>
 <body>
@@ -320,7 +394,7 @@
             <header>
                 <h1>Valorant Account Gallery</h1>
                 <div>
-                    <button id="add-account-btn">+ Add New Account</button>
+                    <button id="add-account-btn">+ Add Account</button>
                 </div>
             </header>
             
@@ -329,13 +403,13 @@
                     <!-- Account cards will be injected here by JS -->
                 </div>
                 <div id="no-accounts-message">
-                    <p>No accounts added yet. Click "Add New Account" to get started!</p>
+                    <p>No accounts added yet.</p>
                 </div>
             </main>
         </div>
         
         <!-- ======================= -->
-        <!-- == ADD ACCOUNT PAGE === -->
+        <!-- == ADD/EDIT ACCOUNT PAGE === -->
         <!-- ======================= -->
         <div id="add-account-page" class="hidden">
             <h2 id="form-title">Add a New Valorant Account</h2>
@@ -348,6 +422,11 @@
                 <div class="form-group">
                     <label for="val-password">Valorant Password</label>
                     <input type="text" id="val-password" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="val-price-pkr">Account Price (PKR)</label>
+                    <input type="number" id="val-price-pkr" placeholder="e.g., 5000" required>
                 </div>
 
                 <div class="form-group">
@@ -370,7 +449,7 @@
                 <button type="button" id="add-skin-btn" class="secondary" style="margin-top: 10px;">+ Add Skin</button>
                 
                 <div id="total-price-display">
-                    Total Value: $0.00
+                    Total Value: 0 VP
                 </div>
                 
                 <div class="form-actions">
@@ -385,12 +464,30 @@
         <!-- ======================= -->
         <div id="pin-modal" class="modal-overlay hidden">
             <div class="modal-content">
-                <h2 id="pin-title">Enter PIN to Add Account</h2>
+                <h2 id="pin-title">Enter PIN</h2>
                 <input type="password" id="pin-input" maxlength="4" pattern="\d{4}" placeholder="----">
                 <p id="pin-error"></p>
                 <div class="modal-actions">
                     <button id="pin-cancel-btn" class="secondary">Cancel</button>
                     <button id="pin-confirm-btn">Confirm</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ======================= -->
+        <!-- ====== BUY MODAL ====== -->
+        <!-- ======================= -->
+        <div id="buy-modal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <h2>Contact to Buy</h2>
+                <div class="contact-links">
+                    <a href="https://wa.me/+923335733211" target="_blank" rel="noopener noreferrer">WhatsApp: +92 333 5733211</a>
+                    <a href="https://discordapp.com/users/836187258410762260" target="_blank" rel="noopener noreferrer">Discord Profile Link</a>
+                    <p>Discord Username: its.abdullah001</p>
+                    <a href="https://www.facebook.com/its.abdullah.janjua" target="_blank" rel="noopener noreferrer">Facebook: Abdullah Janjua</a>
+                </div>
+                <div class="modal-actions">
+                     <button id="buy-modal-close-btn">Close</button>
                 </div>
             </div>
         </div>
@@ -403,6 +500,7 @@
             const appPage = document.getElementById('app-page');
             const addAccountPage = document.getElementById('add-account-page');
             const pinModal = document.getElementById('pin-modal');
+            const buyModal = document.getElementById('buy-modal');
 
             // --- Buttons ---
             const showAddAccountFormBtn = document.getElementById('add-account-btn');
@@ -410,6 +508,7 @@
             const cancelBtn = document.getElementById('cancel-btn');
             const pinConfirmBtn = document.getElementById('pin-confirm-btn');
             const pinCancelBtn = document.getElementById('pin-cancel-btn');
+            const buyModalCloseBtn = document.getElementById('buy-modal-close-btn');
             const submitBtn = document.getElementById('submit-btn');
 
             // --- Forms & Containers ---
@@ -428,7 +527,8 @@
             // --- App State ---
             const CORRECT_PIN = '0900';
             let valorantAccounts = [];
-            let editingAccountId = null; // To track if we are adding or editing
+            let editingAccountId = null; 
+            let currentAction = null; // 'add', 'edit', 'sell', 'remove', or 'buy'
             
             // --- Initialize App ---
             renderAccounts();
@@ -441,7 +541,7 @@
             };
 
             showAddAccountFormBtn.addEventListener('click', () => {
-                editingAccountId = null; // Ensure we are in "add" mode
+                currentAction = 'add';
                 pinTitle.textContent = 'Enter PIN to Add Account';
                 pinInput.value = '';
                 pinError.textContent = '';
@@ -467,12 +567,11 @@
 
                 pinModal.classList.add('hidden');
                 
-                if (editingAccountId) {
-                    // Editing existing account
+                if (currentAction === 'edit') {
                     const accountToEdit = valorantAccounts.find(acc => acc.id == editingAccountId);
                     populateFormForEdit(accountToEdit);
-                } else {
-                    // Adding new account
+                    showPage(addAccountPage);
+                } else if (currentAction === 'add') {
                     formTitle.textContent = 'Add a New Valorant Account';
                     submitBtn.textContent = 'Save Account';
                     addAccountForm.reset();
@@ -480,8 +579,20 @@
                     updateTotalPrice();
                     imagePreview.classList.add('hidden');
                     imagePreview.setAttribute('src', '#');
+                    showPage(addAccountPage);
+                } else if (currentAction === 'sell') {
+                    const accountToSell = valorantAccounts.find(acc => acc.id == editingAccountId);
+                    accountToSell.isSold = !accountToSell.isSold;
+                    renderAccounts();
+                } else if (currentAction === 'remove') {
+                    valorantAccounts = valorantAccounts.filter(acc => acc.id != editingAccountId);
+                    renderAccounts();
                 }
-                showPage(addAccountPage);
+            });
+            
+            // --- Buy Modal Logic ---
+            buyModalCloseBtn.addEventListener('click', () => {
+                buyModal.classList.add('hidden');
             });
 
             // --- Image Preview Logic ---
@@ -495,11 +606,21 @@
                 }
             });
             
-            // --- Edit Logic ---
+            // --- Card Actions (Edit, Sell, Remove, Buy) Logic ---
             accountList.addEventListener('click', (e) => {
-                if (e.target.classList.contains('edit-btn')) {
-                    editingAccountId = e.target.dataset.id;
-                    pinTitle.textContent = 'Enter PIN to Edit Account';
+                const targetButton = e.target;
+                if (targetButton.tagName !== 'BUTTON') return;
+
+                const action = targetButton.dataset.action;
+                if (!action) return;
+
+                currentAction = action;
+                editingAccountId = targetButton.dataset.id;
+                
+                if (action === 'buy') {
+                    buyModal.classList.remove('hidden');
+                } else {
+                    pinTitle.textContent = `Enter PIN to ${action.charAt(0).toUpperCase() + action.slice(1)} Account`;
                     pinInput.value = '';
                     pinError.textContent = '';
                     pinModal.classList.remove('hidden');
@@ -511,6 +632,7 @@
                 submitBtn.textContent = 'Update Account';
                 document.getElementById('val-username').value = account.username;
                 document.getElementById('val-password').value = account.password;
+                document.getElementById('val-price-pkr').value = account.accountPricePKR;
                 document.getElementById('val-description').value = account.description;
                 
                 imagePreview.src = account.image;
@@ -522,7 +644,7 @@
                     skinInputGroup.classList.add('skin-input-group');
                     skinInputGroup.innerHTML = `
                         <input type="text" placeholder="Skin Name" value="${skin.name}" data-type="name" required>
-                        <input type="number" placeholder="Price ($)" value="${skin.price}" min="0" step="0.01" data-type="price" required>
+                        <input type="number" placeholder="Price (VP)" value="${skin.price}" min="0" step="1" data-type="price" required>
                     `;
                     skinsContainer.appendChild(skinInputGroup);
                 });
@@ -543,40 +665,37 @@
                     }
                 });
                 
-                const totalValue = skins.reduce((sum, skin) => sum + skin.price, 0);
-
                 const imageFile = document.getElementById('val-image').files[0];
                 
                 if (editingAccountId) {
-                    // Update existing account
                     const accountToUpdate = valorantAccounts.find(acc => acc.id == editingAccountId);
                     accountToUpdate.username = document.getElementById('val-username').value;
                     accountToUpdate.password = document.getElementById('val-password').value;
+                    accountToUpdate.accountPricePKR = document.getElementById('val-price-pkr').value;
                     accountToUpdate.description = document.getElementById('val-description').value;
                     accountToUpdate.skins = skins;
-                    accountToUpdate.totalValue = totalValue;
                     if (imageFile) {
                          accountToUpdate.image = URL.createObjectURL(imageFile);
                     }
                 } else {
-                    // Add new account
                     const imageUrl = imageFile 
                         ? URL.createObjectURL(imageFile) 
-                        : `https://placehold.co/800x500/0F1923/FD4556?text=No+Image`;
+                        : `https://placehold.co/800x300/0F1923/FD4556?text=No+Image`;
                     
                     const newAccount = {
                         id: Date.now(),
                         username: document.getElementById('val-username').value,
                         password: document.getElementById('val-password').value,
+                        accountPricePKR: document.getElementById('val-price-pkr').value,
                         description: document.getElementById('val-description').value,
                         image: imageUrl,
                         skins: skins,
-                        totalValue: totalValue
+                        isSold: false
                     };
                     valorantAccounts.push(newAccount);
                 }
                 
-                editingAccountId = null; // Reset editing state
+                editingAccountId = null;
                 renderAccounts();
                 showPage(appPage);
             });
@@ -593,7 +712,7 @@
                 
                 skinInputGroup.innerHTML = `
                     <input type="text" placeholder="Skin Name (e.g., Reaver Vandal)" data-type="name" required>
-                    <input type="number" placeholder="Price ($)" min="0" step="0.01" data-type="price" required>
+                    <input type="number" placeholder="Price (VP)" min="0" step="1" data-type="price" required>
                 `;
                 skinsContainer.appendChild(skinInputGroup);
             });
@@ -613,7 +732,7 @@
                         total += price;
                     }
                 });
-                totalPriceDisplay.textContent = `Total Value: $${total.toFixed(2)}`;
+                totalPriceDisplay.textContent = `Total Value: ${total} VP`;
             }
 
             // --- Rendering Logic ---
@@ -624,32 +743,42 @@
                     noAccountsMessage.classList.remove('hidden');
                 } else {
                     noAccountsMessage.classList.add('hidden');
-                    valorantAccounts.forEach(account => {
+                    valorantAccounts.forEach((account, index) => {
                         const card = document.createElement('div');
                         card.classList.add('account-card');
+                        if (account.isSold) {
+                            card.classList.add('sold-card');
+                        }
                         
-                        let skinsHtml = account.skins.map(skin => `
+                        let skinsHtml = account.skins.map((skin, skinIndex) => `
                             <li>
-                                <span>${skin.name}</span>
-                                <span>$${skin.price.toFixed(2)}</span>
+                                <span>Skin ${skinIndex + 1}: ${skin.name}</span>
+                                <span>${skin.price} VP</span>
                             </li>
                         `).join('');
 
                         card.innerHTML = `
+                            ${account.isSold ? '<div class="sold-banner">SOLD</div>' : ''}
                             <div class="account-card-image">
-                                <img src="${account.image}" alt="Account Image" onerror="this.onerror=null;this.src='https://placehold.co/800x500/0F1923/FD4556?text=No+Image';">
+                                <img src="${account.image}" alt="Account Image" onerror="this.onerror=null;this.src='https://placehold.co/800x300/0F1923/FD4556?text=No+Image';">
                             </div>
                             <div class="account-card-info">
                                 <div class="account-card-header">
-                                    <h3>${account.username}</h3>
-                                    <button class="edit-btn secondary" data-id="${account.id}">Edit</button>
+                                    <h3>Account #${index + 1} - ${account.username}</h3>
+                                    <div class="account-card-actions">
+                                        <button class="secondary" data-action="edit" data-id="${account.id}">Edit</button>
+                                        <button data-action="sell" data-id="${account.id}">${account.isSold ? 'Unmark' : 'Mark as Sold'}</button>
+                                        <button class="remove-btn" data-action="remove" data-id="${account.id}">Remove</button>
+                                    </div>
                                 </div>
-                                <p><strong>Password:</strong> ${account.password}</p>
-                                <p>${account.description || 'No description provided.'}</p>
+                                <p><strong>Description:</strong> ${account.description || 'No description provided.'}</p>
                                 <ul class="skins-list">
                                     ${skinsHtml || '<li>No skins added.</li>'}
                                 </ul>
-                                <div class="total-value">Total Value: $${account.totalValue.toFixed(2)}</div>
+                                <div class="account-price">
+                                    <span>Price: ${account.accountPricePKR || 0} PKR</span>
+                                    <button class="buy-btn" data-action="buy" data-id="${account.id}">Buy Now</button>
+                                </div>
                             </div>
                         `;
                         accountList.appendChild(card);
