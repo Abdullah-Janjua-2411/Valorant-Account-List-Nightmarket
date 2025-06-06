@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valorant Inventory Preview</title>
+    <style>
+        /* --- Global Styles & Valorant Theme --- */
+        @import url('https://fonts.googleapis.com/css2?family=Teko:wght@400;500;700&display=swap');
+
+        :root {
+            --valorant-red: #FD4556;
+            --valorant-dark: #0F1923;
+            --valorant-light: #ECE8E1;
+            --valorant-grey: #7E878F;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Teko', sans-serif;
+            background-color: var(--valorant-dark);
+            color: var(--valorant-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        /* --- Utility Classes --- */
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- Buttons --- */
+        button {
+            font-family: 'Teko', sans-serif;
+            background-color: var(--valorant-red);
+            color: var(--valorant-light);
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1.4rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+            border: 2px solid var(--valorant-red);
+            border-radius: 4px;
+        }
+
+        button:hover {
+            background-color: var(--valorant-dark);
+            color: var(--valorant-red);
+        }
+        
+        button.secondary {
+             background-color: transparent;
+             color: var(--valorant-light);
+             border: 2px solid var(--valorant-light);
+        }
+
+        button.secondary:hover {
+            background-color: var(--valorant-light);
+            color: var(--valorant-dark);
+        }
+
+        /* --- Form & Input Styles --- */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1.5rem;
+            color: var(--valorant-red);
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--valorant-light);
+            border: 2px solid var(--valorant-grey);
+            color: var(--valorant-dark);
+            font-family: 'Teko', sans-serif;
+            font-size: 1.2rem;
+            border-radius: 4px;
+        }
+        
+        input[type="file"] {
+            color: var(--valorant-light);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        #image-preview {
+            width: 100%;
+            height: 500px;
+            margin-top: 15px;
+            border: 2px solid var(--valorant-grey);
+            border-radius: 4px;
+            object-fit: cover;
+        }
+
+        /* --- Main App Page --- */
+        #app-page header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--valorant-red);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        #app-page h1 {
+            font-size: 3rem;
+            color: var(--valorant-light);
+        }
+
+        /* --- Account Card --- */
+        #account-list {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .account-card {
+            background-color: #1a2836;
+            border: 1px solid var(--valorant-grey);
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr; 
+            gap: 20px;
+            align-items: center;
+            border-radius: 8px;
+        }
+        
+        .account-card-image img {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            border: 2px solid var(--valorant-red);
+            border-radius: 4px;
+        }
+        
+        .account-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .account-card-info {
+            padding-top: 10px;
+        }
+
+        .account-card-info h3 {
+            color: var(--valorant-red);
+            font-size: 2rem;
+            margin-bottom: 0;
+        }
+        
+        .account-card-info p {
+            margin-bottom: 15px;
+            word-break: break-all;
+        }
+
+        .skins-list {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 10px;
+        }
+
+        .skins-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 0;
+            border-bottom: 1px dashed var(--valorant-grey);
+        }
+        
+        .total-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: right;
+            color: var(--valorant-red);
+            margin-top: 10px;
+        }
+
+        #no-accounts-message {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.5rem;
+            color: var(--valorant-grey);
+            border: 2px dashed var(--valorant-grey);
+            border-radius: 8px;
+        }
+        
+        /* --- Add Account Form Page --- */
+        #add-account-page {
+             border: 2px solid var(--valorant-light);
+             padding: 30px;
+             border-radius: 8px;
+             background-color: #1a2836;
+        }
+        
+        #add-account-page h2 {
+            font-size: 3rem;
+            color: var(--valorant-red);
+            margin-bottom: 20px;
+        }
+        
+        #skins-container {
+            margin-top: 20px;
+            display: grid;
+            gap: 15px;
+        }
+        
+        .skin-input-group {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        #total-price-display {
+            font-size: 2rem;
+            color: var(--valorant-red);
+            margin-top: 20px;
+            border-top: 2px solid var(--valorant-red);
+            padding-top: 10px;
+            text-align: right;
+        }
+        
+        .form-actions {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        /* --- PIN Modal --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background-color: var(--valorant-dark);
+            padding: 40px;
+            border: 2px solid var(--valorant-red);
+            border-radius: 8px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+        
+        .modal-content h2 {
+             font-size: 2.5rem;
+             color: var(--valorant-light);
+             margin-bottom: 20px;
+        }
+        
+        .modal-content input {
+            text-align: center;
+            font-size: 2rem;
+            letter-spacing: 1rem;
+        }
+        
+        #pin-error {
+            color: var(--valorant-red);
+            margin-top: 10px;
+            height: 20px;
+        }
+        
+        .modal-actions {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- ======================= -->
+        <!-- ===== MAIN APP PAGE === -->
+        <!-- ======================= -->
+        <div id="app-page">
+            <header>
+                <h1>Valorant Account Gallery</h1>
+                <div>
+                    <button id="add-account-btn">+ Add New Account</button>
+                </div>
+            </header>
+            
+            <main>
+                <div id="account-list">
+                    <!-- Account cards will be injected here by JS -->
+                </div>
+                <div id="no-accounts-message">
+                    <p>No accounts added yet. Click "Add New Account" to get started!</p>
+                </div>
+            </main>
+        </div>
+        
+        <!-- ======================= -->
+        <!-- == ADD ACCOUNT PAGE === -->
+        <!-- ======================= -->
+        <div id="add-account-page" class="hidden">
+            <h2 id="form-title">Add a New Valorant Account</h2>
+            <form id="add-account-form">
+                <div class="form-group">
+                    <label for="val-username">Valorant Username</label>
+                    <input type="text" id="val-username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="val-password">Valorant Password</label>
+                    <input type="text" id="val-password" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="val-image">Account Picture</label>
+                    <input type="file" id="val-image" accept="image/*">
+                    <img id="image-preview" src="#" alt="Image Preview" class="hidden">
+                </div>
+                
+                <div class="form-group">
+                    <label for="val-description">Description</label>
+                    <textarea id="val-description" placeholder="e.g., Main account, Radiant rank, includes Ion Sheriff..."></textarea>
+                </div>
+                
+                <hr style="border-color: var(--valorant-red); margin: 30px 0;">
+                
+                <label>Skin Inventory (Max 6)</label>
+                <div id="skins-container">
+                    <!-- Skin input groups will be injected here -->
+                </div>
+                <button type="button" id="add-skin-btn" class="secondary" style="margin-top: 10px;">+ Add Skin</button>
+                
+                <div id="total-price-display">
+                    Total Value: $0.00
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" id="cancel-btn" class="secondary">Cancel</button>
+                    <button type="submit" id="submit-btn">Save Account</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ======================= -->
+        <!-- ====== PIN MODAL ====== -->
+        <!-- ======================= -->
+        <div id="pin-modal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <h2 id="pin-title">Enter PIN to Add Account</h2>
+                <input type="password" id="pin-input" maxlength="4" pattern="\d{4}" placeholder="----">
+                <p id="pin-error"></p>
+                <div class="modal-actions">
+                    <button id="pin-cancel-btn" class="secondary">Cancel</button>
+                    <button id="pin-confirm-btn">Confirm</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Page Elements ---
+            const appPage = document.getElementById('app-page');
+            const addAccountPage = document.getElementById('add-account-page');
+            const pinModal = document.getElementById('pin-modal');
+
+            // --- Buttons ---
+            const showAddAccountFormBtn = document.getElementById('add-account-btn');
+            const addSkinBtn = document.getElementById('add-skin-btn');
+            const cancelBtn = document.getElementById('cancel-btn');
+            const pinConfirmBtn = document.getElementById('pin-confirm-btn');
+            const pinCancelBtn = document.getElementById('pin-cancel-btn');
+            const submitBtn = document.getElementById('submit-btn');
+
+            // --- Forms & Containers ---
+            const addAccountForm = document.getElementById('add-account-form');
+            const skinsContainer = document.getElementById('skins-container');
+            const accountList = document.getElementById('account-list');
+            const noAccountsMessage = document.getElementById('no-accounts-message');
+            const totalPriceDisplay = document.getElementById('total-price-display');
+            const pinInput = document.getElementById('pin-input');
+            const pinError = document.getElementById('pin-error');
+            const valImageInput = document.getElementById('val-image');
+            const imagePreview = document.getElementById('image-preview');
+            const formTitle = document.getElementById('form-title');
+            const pinTitle = document.getElementById('pin-title');
+            
+            // --- App State ---
+            const CORRECT_PIN = '0900';
+            let valorantAccounts = [];
+            let editingAccountId = null; // To track if we are adding or editing
+            
+            // --- Initialize App ---
+            renderAccounts();
+
+            // --- Navigation Logic ---
+            const showPage = (pageToShow) => {
+                appPage.classList.add('hidden');
+                addAccountPage.classList.add('hidden');
+                pageToShow.classList.remove('hidden');
+            };
+
+            showAddAccountFormBtn.addEventListener('click', () => {
+                editingAccountId = null; // Ensure we are in "add" mode
+                pinTitle.textContent = 'Enter PIN to Add Account';
+                pinInput.value = '';
+                pinError.textContent = '';
+                pinModal.classList.remove('hidden');
+            });
+
+            cancelBtn.addEventListener('click', () => {
+                showPage(appPage);
+                renderAccounts();
+            });
+            
+            // --- PIN Modal Logic ---
+            pinCancelBtn.addEventListener('click', () => {
+                pinModal.classList.add('hidden');
+            });
+            
+            pinConfirmBtn.addEventListener('click', () => {
+                if (pinInput.value !== CORRECT_PIN) {
+                    pinError.textContent = 'Incorrect PIN. Please try again.';
+                    pinInput.value = '';
+                    return;
+                }
+
+                pinModal.classList.add('hidden');
+                
+                if (editingAccountId) {
+                    // Editing existing account
+                    const accountToEdit = valorantAccounts.find(acc => acc.id == editingAccountId);
+                    populateFormForEdit(accountToEdit);
+                } else {
+                    // Adding new account
+                    formTitle.textContent = 'Add a New Valorant Account';
+                    submitBtn.textContent = 'Save Account';
+                    addAccountForm.reset();
+                    skinsContainer.innerHTML = '';
+                    updateTotalPrice();
+                    imagePreview.classList.add('hidden');
+                    imagePreview.setAttribute('src', '#');
+                }
+                showPage(addAccountPage);
+            });
+
+            // --- Image Preview Logic ---
+            valImageInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    imagePreview.src = URL.createObjectURL(file);
+                    imagePreview.classList.remove('hidden');
+                } else {
+                    imagePreview.classList.add('hidden');
+                }
+            });
+            
+            // --- Edit Logic ---
+            accountList.addEventListener('click', (e) => {
+                if (e.target.classList.contains('edit-btn')) {
+                    editingAccountId = e.target.dataset.id;
+                    pinTitle.textContent = 'Enter PIN to Edit Account';
+                    pinInput.value = '';
+                    pinError.textContent = '';
+                    pinModal.classList.remove('hidden');
+                }
+            });
+
+            function populateFormForEdit(account) {
+                formTitle.textContent = 'Edit Valorant Account';
+                submitBtn.textContent = 'Update Account';
+                document.getElementById('val-username').value = account.username;
+                document.getElementById('val-password').value = account.password;
+                document.getElementById('val-description').value = account.description;
+                
+                imagePreview.src = account.image;
+                imagePreview.classList.remove('hidden');
+                
+                skinsContainer.innerHTML = '';
+                account.skins.forEach(skin => {
+                    const skinInputGroup = document.createElement('div');
+                    skinInputGroup.classList.add('skin-input-group');
+                    skinInputGroup.innerHTML = `
+                        <input type="text" placeholder="Skin Name" value="${skin.name}" data-type="name" required>
+                        <input type="number" placeholder="Price ($)" value="${skin.price}" min="0" step="0.01" data-type="price" required>
+                    `;
+                    skinsContainer.appendChild(skinInputGroup);
+                });
+                updateTotalPrice();
+            }
+
+            // --- Form Submission Logic (Handles both Add and Edit) ---
+            addAccountForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const skins = [];
+                const skinGroups = skinsContainer.querySelectorAll('.skin-input-group');
+                skinGroups.forEach(group => {
+                    const name = group.querySelector('input[data-type="name"]').value;
+                    const price = parseFloat(group.querySelector('input[data-type="price"]').value);
+                    if (name && !isNaN(price)) {
+                        skins.push({ name, price });
+                    }
+                });
+                
+                const totalValue = skins.reduce((sum, skin) => sum + skin.price, 0);
+
+                const imageFile = document.getElementById('val-image').files[0];
+                
+                if (editingAccountId) {
+                    // Update existing account
+                    const accountToUpdate = valorantAccounts.find(acc => acc.id == editingAccountId);
+                    accountToUpdate.username = document.getElementById('val-username').value;
+                    accountToUpdate.password = document.getElementById('val-password').value;
+                    accountToUpdate.description = document.getElementById('val-description').value;
+                    accountToUpdate.skins = skins;
+                    accountToUpdate.totalValue = totalValue;
+                    if (imageFile) {
+                         accountToUpdate.image = URL.createObjectURL(imageFile);
+                    }
+                } else {
+                    // Add new account
+                    const imageUrl = imageFile 
+                        ? URL.createObjectURL(imageFile) 
+                        : `https://placehold.co/800x500/0F1923/FD4556?text=No+Image`;
+                    
+                    const newAccount = {
+                        id: Date.now(),
+                        username: document.getElementById('val-username').value,
+                        password: document.getElementById('val-password').value,
+                        description: document.getElementById('val-description').value,
+                        image: imageUrl,
+                        skins: skins,
+                        totalValue: totalValue
+                    };
+                    valorantAccounts.push(newAccount);
+                }
+                
+                editingAccountId = null; // Reset editing state
+                renderAccounts();
+                showPage(appPage);
+            });
+
+            addSkinBtn.addEventListener('click', () => {
+                const skinCount = skinsContainer.querySelectorAll('.skin-input-group').length;
+                if (skinCount >= 6) {
+                    alert("You can add a maximum of 6 skins.");
+                    return;
+                }
+
+                const skinInputGroup = document.createElement('div');
+                skinInputGroup.classList.add('skin-input-group');
+                
+                skinInputGroup.innerHTML = `
+                    <input type="text" placeholder="Skin Name (e.g., Reaver Vandal)" data-type="name" required>
+                    <input type="number" placeholder="Price ($)" min="0" step="0.01" data-type="price" required>
+                `;
+                skinsContainer.appendChild(skinInputGroup);
+            });
+            
+            skinsContainer.addEventListener('input', (e) => {
+                if (e.target.dataset.type === 'price') {
+                    updateTotalPrice();
+                }
+            });
+
+            function updateTotalPrice() {
+                const priceInputs = skinsContainer.querySelectorAll('input[data-type="price"]');
+                let total = 0;
+                priceInputs.forEach(input => {
+                    const price = parseFloat(input.value);
+                    if (!isNaN(price)) {
+                        total += price;
+                    }
+                });
+                totalPriceDisplay.textContent = `Total Value: $${total.toFixed(2)}`;
+            }
+
+            // --- Rendering Logic ---
+            function renderAccounts() {
+                accountList.innerHTML = ''; 
+
+                if (valorantAccounts.length === 0) {
+                    noAccountsMessage.classList.remove('hidden');
+                } else {
+                    noAccountsMessage.classList.add('hidden');
+                    valorantAccounts.forEach(account => {
+                        const card = document.createElement('div');
+                        card.classList.add('account-card');
+                        
+                        let skinsHtml = account.skins.map(skin => `
+                            <li>
+                                <span>${skin.name}</span>
+                                <span>$${skin.price.toFixed(2)}</span>
+                            </li>
+                        `).join('');
+
+                        card.innerHTML = `
+                            <div class="account-card-image">
+                                <img src="${account.image}" alt="Account Image" onerror="this.onerror=null;this.src='https://placehold.co/800x500/0F1923/FD4556?text=No+Image';">
+                            </div>
+                            <div class="account-card-info">
+                                <div class="account-card-header">
+                                    <h3>${account.username}</h3>
+                                    <button class="edit-btn secondary" data-id="${account.id}">Edit</button>
+                                </div>
+                                <p><strong>Password:</strong> ${account.password}</p>
+                                <p>${account.description || 'No description provided.'}</p>
+                                <ul class="skins-list">
+                                    ${skinsHtml || '<li>No skins added.</li>'}
+                                </ul>
+                                <div class="total-value">Total Value: $${account.totalValue.toFixed(2)}</div>
+                            </div>
+                        `;
+                        accountList.appendChild(card);
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
